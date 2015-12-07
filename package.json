@@ -1,0 +1,44 @@
+{
+  "name": "automata",
+  "version": "1.0.0",
+  "main": "backend",
+  "description": "Plugin for automatic generating all CRUD methods to the UI.",
+  "author": "Robins Gupta",
+  "authorEmail": "robinskumar73@gmail.com",
+  "routeExposure": "/automata",
+  "staticFiles": {
+    "css": {
+        "automataCss" : "/automata/style/automata.css",
+        "jqueryDataTables": "/automata/style/bower_components/datatables.net-dt/css/jquery.dataTables.min.css"
+      },
+    "js": {
+      "automataRoute": "/automata/scripts/routes/automata.js",
+      "automataController": "/automata/scripts/controllers/automata.js",
+      "automataDirective": "/automata/scripts/directives/automata.js",
+      "jqueryDatatables": "/automata/style/bower_components/datatables.net/js/jquery.dataTables.min.js"
+    },
+    "moduleDependencies":{
+
+    },
+    "settings": "/automata/settings.js"
+  },
+  "bodystructure": {
+    "asidebarHook": [],
+    "sidebarHook": [],
+    "headerHook": [],
+    "footerHook":[]
+  },
+  "databases": {
+  },
+  "activate": true,
+  "services": {},
+  "dependencies": {},
+  "optionalDependencies": {},
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "devDependencies": {
+   
+  }
+}
