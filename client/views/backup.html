@@ -20,7 +20,66 @@
 <!--ADD WIDGETS -->
 <!-- Page Content -->
 <div class="content">
+    <!-- User Widgets -->
+    <h2 class="content-heading">{{widgetsTitle}}</h2>
 
+    <!-- User Simple Widgets -->
+    <div class="row">
+        <div class="col-sm-6 col-lg-3">
+            <a class="block block-rounded block-link-hover3" href="javascript:void(0)">
+                <div class="block-content block-content-full clearfix">
+                    <div class="pull-right">
+                        <img class="img-avatar" src="assets/img/avatars/avatar7.jpg" alt="">
+                    </div>
+                    <div class="pull-left push-10-t">
+                        <div class="font-w600 push-5">12</div>
+                        <div class="text-muted">Recipe added </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a class="block block-rounded block-link-hover3" href="javascript:void(0)">
+                <div class="block-content block-content-full clearfix">
+                    <div class="pull-right">
+                        <img class="img-avatar" src="assets/img/avatars/avatar7.jpg" alt="">
+                    </div>
+                    <div class="pull-left push-10-t">
+                        <div class="font-w600 push-5">5</div>
+                        <div class="text-muted">Recipe published today</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a class="block block-rounded block-link-hover3" href="javascript:void(0)">
+                <div class="block-content block-content-full clearfix">
+                    <div class="text-right pull-right push-10-t">
+                        <div class="font-w600 push-5">4</div>
+                        <div class="text-muted">Pending recipe</div>
+                    </div>
+                    <div class="pull-left">
+                        <img class="img-avatar" src="assets/img/avatars/avatar15.jpg" alt="">
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a class="block block-rounded block-link-hover3" data-toggle="modal" data-target="#modal-fadein" href="javascript:void(0)">
+                <div class="block-content block-content-full clearfix">
+                    <div class="text-right pull-right push-10-t">
+                        <div class="font-w600 push-5">+</div>
+                        <div class="text-muted">Add recipe</div>
+                    </div>
+                    <div class="pull-left">
+                        <img class="img-avatar" src="assets/img/avatars/avatar15.jpg" alt="">
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- END User Simple Widgets -->
+</div>
 
 
 
@@ -34,19 +93,73 @@
                     <h3 class="block-title">{{tableTitle}}</h3>
                 </div>
                 <div class="block-content">
-
                     <div class="table-responsive" style="overflow-x: hidden;">
                         <table class="table table-bordered table-striped js-dataTable-full" >
                             <thead>
-                                <tr>
-                                    <!--Adding :: for one way binding -->
-                                    <th ng-repeat="header in ::tableValueSettings.header">{{header}}</th>
-                                </tr>
+                            <tr>
+                                <th class="text-center"></th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th style="width: 15%;">Access</th>
+                                <th class="text-center" style="width: 10%;">Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="(rowId, rowObject) in rowListValues">
-                                    <!--Populating the table values and binding header with columnVal-->
-                                    <td automata-map-value model-prop="tableValueSettings.properties" row-id="rowId" row-object="rowObject" column-header="header" ng-repeat="header in ::tableValueSettings.header" ></td>
+                                <tr>
+                                    <td class="text-center">1</td>
+                                    <td class="font-w600">Denise Watson</td>
+                                    <td>client1@example.com</td>
+                                    <td>
+                                        <span class="label label-primary">Personal</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Edit Client"><i class="fa fa-pencil"></i></button>
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Remove Client"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">26</td>
+                                    <td class="font-w600">Craig Stone</td>
+                                    <td>client26@example.com</td>
+                                    <td>
+                                        <span class="label label-info">Business</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Edit Client"><i class="fa fa-pencil"></i></button>
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Remove Client"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">27</td>
+                                    <td class="font-w600">Adam Hall</td>
+                                    <td>client27@example.com</td>
+                                    <td>
+                                        <span class="label label-info">Business</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Edit Client"><i class="fa fa-pencil"></i></button>
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Remove Client"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">40</td>
+                                    <td class="font-w600">Eugene Burke</td>
+                                    <td>client40@example.com</td>
+                                    <td>
+                                        <span class="label label-success">VIP</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Edit Client"><i class="fa fa-pencil"></i></button>
+                                            <button class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="Remove Client"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -55,10 +168,6 @@
             </div><!--div.block-->
             <!-- END Dynamic Table Full -->
         </div>
-
-
-
-
 
         <!--Adding Filters-->
         <div snaphy-load-filters class="col-lg-4 col-sm-12" >
