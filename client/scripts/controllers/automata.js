@@ -10,6 +10,29 @@ angular.module($snaphy.getModuleName())
         $snaphy.setDefaultTemplate(defaultTemplate);
 
 
+
+
+        $scope.checkType = function(rowObject, columnHeader){
+            var key = $scope.getKey(rowObject, columnHeader);
+            var colValue = rowObject[key];
+            var type = Object.prototype.toString.call(colValue);
+            return type;
+        };
+
+
+        $scope.getKey = function(rowObject, columnHeader){
+            var keyName;
+            if(rowObject[columnHeader] !== undefined){
+                keyName = columnHeader;
+            }else{
+                //Its a relational header properties name... map the header.. replace `customer_name` to name
+                var patt = /\_[A-Z0-9a-z]+$/;
+                keyName = columnHeader.replace(patt, '');
+            }
+            return keyName;
+        };
+
+
         /**
          * INITIALIZING SOME DUMMY DATA..
          */
@@ -19,9 +42,9 @@ angular.module($snaphy.getModuleName())
         $scope.title = "Automata Plugin";
         $scope.description = "Automata Plugin for auto generating CRUD methods.";
 
-
-        $scope.tableValueSettings = {
-            "header":['name', 'email', 'access_level'],
+        //Its a model properties for customer..
+        $scope.customerModelSettings = {
+            "header":['name', 'email', 'access_level', 'phoneNumber'],
             "properties":{
                 "name":{
                     type:"string",
@@ -37,6 +60,17 @@ angular.module($snaphy.getModuleName())
                         required: true
                     }
                 }
+            },
+            "tables":{
+                name:{
+                    onClick:{
+                        state:"dashboard",
+                        params:{
+                            name:"name"
+                        }
+                    }
+                }
+
             }
         };
 
@@ -50,7 +84,8 @@ angular.module($snaphy.getModuleName())
                         type:1,
                         height:1
                     }
-                }
+                },
+                "phoneNumber": 9953242338
             },
             {
                 name:"Ravi Gupta",
@@ -60,8 +95,9 @@ angular.module($snaphy.getModuleName())
                         type:2,
                         height:0
                     }
-                }
-            }
+                },
+                "phoneNumber": 9953242338
+            },
         ];
 
 

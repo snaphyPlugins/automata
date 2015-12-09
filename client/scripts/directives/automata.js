@@ -29,12 +29,14 @@ angular.module($snaphy.getModuleName())
             rowId        : "=rowId"
         },
         link: function (scope, element, attrs) {
+
+
             var keyName;
             if(scope.rowObject[scope.columnHeader] !== undefined){
                 keyName = scope.columnHeader;
             }else{
                 //Its a relational header properties name... map the header.. replace `customer_name` to name
-                var patt = /^[A-Z0-9a-z]*\_/;
+                var patt = /\_[A-Z0-9a-z]+$/;
                 keyName = scope.columnHeader.replace(patt, '');
             }
 
@@ -47,7 +49,9 @@ angular.module($snaphy.getModuleName())
 
                 //If table info not present..
                 if(!propConfig){
-                    return rootTag.val(value);
+                    console.log(value);
+                    console.log(rootTag);
+                    return rootTag.html(value);
                 }
 
                 if(propConfig.onClick !== undefined){
@@ -74,7 +78,8 @@ angular.module($snaphy.getModuleName())
                     //manage onclick here..
                     //Add the anchor tag
                     currentTag = $('<a></a>');
-                    var attrValue = "propConfig.onClick.state(scope.propConfig.onClick[" + scope.rowId + "])";
+                    var attrValue = propConfig.onClick.state + '(' + JSON.stringify(params) + ')';
+                    console.log(attrValue);
                     currentTag.attr("ui-sref", attrValue);
                     //Now add rootTag to currentTag
                     rootTag.append(currentTag);
@@ -94,7 +99,8 @@ angular.module($snaphy.getModuleName())
                 }
 
                 //Now add value to the current tag
-                currentTag.val(value);
+                currentTag.html(value);
+                console.log(rootTag);
                 return rootTag;
             }; //processOnClick
 
@@ -103,14 +109,34 @@ angular.module($snaphy.getModuleName())
              * Find model property from the config file
              */
             var findModelPropertyConfig = function(configModelObj, propertyName){
-                if(configModelObj === undefined){
+                //get the property parameters..
+                var ModalpropertyObj = configModelObj.properties;
+                if(ModalpropertyObj === undefined){
                     return null;
                 }
-                if(configModelObj[propertyName] !== undefined){
-                    return configModelObj[propertyName];
+                if(ModalpropertyObj[propertyName] !== undefined){
+                    return ModalpropertyObj[propertyName];
                 }
                 return null;
             };
+
+
+            /**
+             * Find model property  table configuration from the config file
+             */
+            var findModelPropertyTableConfig = function(configModelTableObj, propertyName){
+                //get the property parameters..
+                var ModalpropertyObj = configModelTableObj;
+                if(ModalpropertyObj === undefined){
+                    return null;
+                }
+                if(ModalpropertyObj[propertyName] !== undefined){
+                    return ModalpropertyObj[propertyName];
+                }
+                return null;
+            };
+
+
             var parseColumn = function(modelProp, rowObject, key, element){
                 var colValue = rowObject[key];
                 //Now checking cheking the type of the value and returning the value according to it..
@@ -118,17 +144,17 @@ angular.module($snaphy.getModuleName())
                 var propConfig;
                 if(type === '[object String]'){
                     //Do the string processing..
-                    propConfig = findModelPropertyConfig(modelProp.tables, key);
+                    propConfig = findModelPropertyTableConfig(modelProp.tables, key);
                     processData(propConfig, rowObject, key, element, colValue);
                 }
                 else if(type === '[object Number]'){
                     //Do the number processing..
-                    propConfig = findModelPropertyConfig(modelProp.tables, key);
+                    propConfig = findModelPropertyTableConfig(modelProp.tables, key);
                     processData(propConfig, rowObject, key, element, colValue);
                 }
                 else if(type === '[object Array]'){
                     //Do the Array processing..
-                    propConfig = findModelPropertyConfig(modelProp.tables, key);
+                    propConfig = findModelPropertyTableConfig(modelProp.tables, key);
                     processData(propConfig, rowObject, key, element, colValue);
                 }
                 else {
@@ -140,21 +166,32 @@ angular.module($snaphy.getModuleName())
                             //Now find the properties..
                             var listItem = $('<li></li>'),
                             propertyValueElement = $('<span></span>');
-                            propConfig = findModelPropertyConfig(modelProp.tables[colValue], modelProperty);
-                            processData(propConfig, rowObject, modelProperty, propertyValueElement, colValue);
-                            var propertyName = $('<span></span>');
-                            propertyName.val(modelProperty);
-                            //Now add this to list..
-                            listItem.append( propertyName + ' : ' + propertyValueElement );
-                            //Now add this to list
-                            list.append(listItem);
+                            if(modelProp.tables !== undefined) {
+                                propConfig = findModelPropertyTableConfig(modelProp.tables[key], modelProperty);
+                                processData(propConfig, rowObject, modelProperty, propertyValueElement, colValue);
+                                var propertyName = $('<span></span>');
+                                propertyName.html(modelProperty);
+                                //Now add this to list..
+                                listItem.append(propertyName + ' : ' + propertyValueElement);
+                                //Now add this to list
+                                list.append(listItem);
+                            }else{
+                                //basic designing..
+                                var propertyName = $('<span></span>');
+                                propertyName.html(modelProperty);
+                                propertyValueElement.html(colValue[modelProperty]);
+                                //Now add this to list..
+                                listItem.append(propertyName + ' : ' + propertyValueElement);
+                                //Now add this to list
+                                list.append(listItem);
+
+                            }
                         }
                     }
                     //Now add this list to root element..
                     $(element).append(list);
                 }
             }//parseColumn
-
 
             //Now call the function..
             parseColumn(scope.modelProp, scope.rowObject, keyName, element);
