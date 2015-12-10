@@ -13,13 +13,23 @@ angular.module($snaphy.getModuleName())
 
 
         $scope.checkType = function(rowObject, columnHeader){
-            var key = $scope.getKey(rowObject, columnHeader);
-            var colValue = rowObject[key];
-            var type = Object.prototype.toString.call(colValue);
-            return type;
+            var colValue = $scope.getColValue(rowObject, columnHeader);
+            return Object.prototype.toString.call(colValue);
         };
 
 
+        $scope.getColValue  = function(rowObject, columnHeader){
+            var key = $scope.getKey(rowObject, columnHeader);
+            return rowObject[key];
+        };
+
+        /**
+         * change prop like access_level to access only
+         * Get the key or the relationship name.
+         * @param rowObject
+         * @param columnHeader
+         * @returns {*}
+         */
         $scope.getKey = function(rowObject, columnHeader){
             var keyName;
             if(rowObject[columnHeader] !== undefined){
@@ -31,6 +41,58 @@ angular.module($snaphy.getModuleName())
             }
             return keyName;
         };
+
+        /**
+         * change prop like access-level to level only
+         * Get the model properties name on the case of belongsTo or hasOne relationships..
+         * @param columnHeader
+         */
+        $scope.getColumnKey = function(columnHeader){
+            var keyName;
+            var patt = /^[A-Z0-9a-z-]+\_/;
+            return columnHeader.replace(patt, '');
+        };
+
+
+
+
+
+
+        /**
+         * Find model property for the table configuration from the config file
+         */
+        $scope.findModelPropertyTableConfig = function(configModelTableObj, propertyName){
+            //get the property parameters..
+            var ModalpropertyObj = configModelTableObj;
+            if(ModalpropertyObj === undefined){
+                return null;
+            }
+            if(ModalpropertyObj[propertyName] !== undefined){
+                return ModalpropertyObj[propertyName];
+            }
+            return null;
+        };
+
+
+        /**
+         * Return the params for ui-sref for onClick
+         * @param params
+         * @param rowObject
+         * @returns {*}
+         */
+        $scope.getParams = function(params, rowObject){
+            for(var key in params){
+                if(params.hasOwnProperty(key)){
+                    params[key] = rowObject[key];
+                }
+            }
+            return params;
+        };
+
+
+
+
+
 
 
         /**
@@ -44,7 +106,7 @@ angular.module($snaphy.getModuleName())
 
         //Its a model properties for customer..
         $scope.customerModelSettings = {
-            "header":['name', 'email', 'access_level', 'phoneNumber'],
+            "header":['name', 'email', 'access_level', 'access_name',  'phoneNumber'],
             "properties":{
                 "name":{
                     type:"string",
@@ -59,6 +121,7 @@ angular.module($snaphy.getModuleName())
                         type:"object",
                         required: true
                     }
+
                 }
             },
             "tables":{
@@ -68,6 +131,12 @@ angular.module($snaphy.getModuleName())
                         params:{
                             name:"name"
                         }
+                    }
+
+                },
+                email:{
+                    tag:{
+                        "robinskumar73@gmail.com": "label-warning"
                     }
                 }
 
@@ -83,7 +152,13 @@ angular.module($snaphy.getModuleName())
                     level:{
                         type:1,
                         height:1
-                    }
+                    },
+                    others:{
+                        email:"rohitbasu2030@gmail.com",
+                        height:1
+                    },
+                    "name": "Robins"
+
                 },
                 "phoneNumber": 9953242338
             },
@@ -97,7 +172,7 @@ angular.module($snaphy.getModuleName())
                     }
                 },
                 "phoneNumber": 9953242338
-            },
+            }
         ];
 
 

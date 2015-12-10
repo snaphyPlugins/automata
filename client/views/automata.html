@@ -46,15 +46,56 @@
                             <tbody>
                                 <tr ng-repeat="(rowId, rowObject) in rowListValues">
                                     <!--Populating the table values and binding header with columnVal-->
-                                    <td
-                                            automata-map-value
-                                            model-prop="customerModelSettings"
-                                            row-id="rowId"
-                                            row-object="rowObject"
-                                            column-header="header"
-                                            ng-repeat="header in ::customerModelSettings.header" >
-                                        <span ng-if="checkType(rowObject, header) === '[object String]'">
+                                    <td ng-init="colType     = checkType(rowObject, header);
+                                                 colValue    = getColValue(rowObject, header);
+                                                 colKey      = getKey(rowObject, header);
+                                                 tableConfig = findModelPropertyTableConfig(customerModelSettings.tables, colKey);"  ng-repeat="header in ::customerModelSettings.header" >
+                                        <span  ng-if="colType === '[object String]'">
+                                            <span ng-if="tableConfig.onClick !== undefined">
+                                                <!--Display link here..-->
+                                                <a ui-sref="{{tableConfig.onClick.state}}({{getParams(tableConfig.onClick.params, rowObject)}})">{{colValue}}</a>
+                                            </span>
+
+                                            <span ng-init="labelType = tableConfig.tag[colValue]" ng-if="tableConfig.tag !== undefined">
+                                                <span ng-if="labelType !== undefined" class="label" ng-class="labelType" >{{colValue}}</span>
+                                                <span ng-if="labelType === undefined" class="label label-default">{{colValue}}</span>
+                                            </span>
+                                            <span ng-if="tableConfig.tag === undefined && tableConfig.onClick === undefined">
+                                                {{colValue}}
+                                            </span>
+                                        </span>
+                                        <span ng-if="colType === '[object Number]'">
                                             <!--Do string populated work here...-->
+                                            {{colValue}}
+                                        </span>
+                                        <span ng-if="colType === '[object Array]'">
+                                            <!--Do string populated work here...-->
+                                            {{colValue}}
+                                        </span>
+                                        <span ng-init="belongToReln = header !== colKey;
+                                              hasOneRelationPropName = getColumnKey(header);
+                                              colType = (belongToReln)? checkType(colValue, hasOneRelationPropName): colType;
+                                              colValue = (belongToReln)? colValue[hasOneRelationPropName] : colValue;"
+                                              ng-if="colType === '[object Object]'">
+                                            <!--Do string populated work here...-->
+                                            <ul ng-if="colType === '[object Object]'">
+                                                <li style="margin-top: 10px;" ng-init="objColType = checkType(colValue, key);" ng-repeat="(key, value) in colValue">
+                                                    <span  ng-if="checkType(colValue, key) === '[object Object]'">
+                                                        <ul>
+                                                            <li ng-repeat="(nestedKey, nestedValue) in getColValue(colValue, key)">
+                                                                <small><strong>{{nestedKey | capitalize}}</strong></small>: <span>{{nestedValue}}</span>
+                                                            </li>
+                                                        </ul>
+                                                    </span>
+                                                    <span ng-if="objColType !== '[object Object]'">
+                                                       <small><strong>{{key | capitalize }}</strong></small>: {{getColValue(colValue, key)}}
+                                                    </span>
+
+                                                </li>
+                                            </ul>
+                                            <span ng-if="colType !== '[object Object]'">
+                                                    {{colValue}}
+                                            </span>
                                         </span>
 
                                     </td>
