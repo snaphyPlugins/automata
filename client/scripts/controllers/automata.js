@@ -99,6 +99,7 @@ angular.module($snaphy.getModuleName())
         };
 
 
+
         /**
          * For resetting all filter on reset button click..
          */
@@ -117,6 +118,288 @@ angular.module($snaphy.getModuleName())
             //Now redraw the tables..
             table.draw();
         };
+
+
+
+
+        /**
+         * Model for storing the model structure..
+         * @param formStructure
+         * @param formModel
+         */
+        $scope.saveForm =  function(formStructure, formModel){
+            /**
+             * Validate the model here..
+             */
+            //Now save the model..
+            var baseDatabase = Database.loadDb(formStructure.model);
+            var relatedData = {
+                hasMany:[]
+                //belongsTo:[],
+                //hasManyThrough:[],
+                //hasAndBelongToMany:[]
+            };
+
+
+
+            //Now first prepare object..
+            formStructure.relations.hasMany.forEach(function(relationName, index){
+                if(formModel[relationName]){
+                    relatedData.hasMany.push(formModel[relationName]);
+                    //Now removing the relation from the model.
+                    delete formModel[relationName];
+                }
+            });
+
+
+
+
+            //Now save the base model..
+            /**
+             * Creting baseModel..
+             */
+            baseDatabase.create({}, formModel, function(baseModel){
+                //Now save the related model..
+                formStructure.relations.hasMany.forEach(function(relationName, index){
+                    addRelatedModel(baseDatabase, relationName, relatedData, index , baseModel.id  );
+                });
+            }, function(respHeader){
+                console.error(respHeader);
+            });
+
+
+            /**
+             * Local method for adding related model..
+             * @param baseDatabase
+             * @param relationName
+             * @param relatedData
+             * @param index
+             */
+            var addRelatedModel= function(baseDatabase, relationName, relatedData, index, parentId ){
+                baseDatabase[relationName].createMany({id:parentId}, relatedData.hasMany[index], function(modelArr){
+                    console.log("Successfully saved related model data");
+                }, function(respHeader){
+                    console.error(respHeader);
+                });
+            };
+
+
+
+
+            /**
+             * Other related model to be implemented later.
+             */
+
+
+        };
+
+
+
+
+        $scope.addFormJSON = {
+            model: "Employee",
+            relations:{
+                hasMany:['recipes'],
+                belongsTo:[],
+                hasManyThrough:[],
+                hasAndBelongToMany:[]
+            },
+            fields:[
+                {
+                    key: 'email',
+                    type: 'input',
+                    templateOptions: {
+                        type: 'email',
+                        label: 'Email address'
+                    }
+                },
+                {
+                    key: 'password',
+                    type: 'input',
+                    templateOptions: {
+                        type: 'password',
+                        label: 'Enter Password'
+                    }
+                },
+                {
+                    key: 'username',
+                    type: 'input',
+                    templateOptions: {
+                        label: 'Enter username',
+                        type:'text'
+                    }
+                },
+                {
+                    type: 'repeatSection',
+                    key: 'recipes',
+                    templateOptions: {
+                        btnText:'Add Recipes',
+                        fields:[
+                            {
+                                key: 'name',
+                                type: 'input',
+                                templateOptions: {
+                                    type: 'text',
+                                    label: 'Enter Recipe'
+                                }
+                            },
+                            {
+                                key: 'description',
+                                type: 'input',
+                                templateOptions: {
+                                    type: 'text',
+                                    label: 'Enter Description'
+                                }
+                            },
+                            {
+                                type: 'repeatSection',
+                                key: 'stepsImage',
+                                templateOptions: {
+                                    btnText:'Upload another image steps',
+                                    fields: [
+                                        {
+                                            className: 'row',
+                                            fieldGroup: [
+                                                {
+                                                    key: 'imageId',
+                                                    type: 'input',
+                                                    templateOptions: {
+                                                        type: 'text',
+                                                        label: 'Enter Image Id'
+                                                    }
+                                                },
+                                                {
+                                                    key: 'containerId',
+                                                    type: 'input',
+                                                    templateOptions: {
+                                                        type: 'text',
+                                                        label: 'Enter Container Id'
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                key: 'recipeType',
+                                type: 'input',
+                                templateOptions: {
+                                    type: 'text',
+                                    label: 'Enter Recipe Type'
+                                }
+                            },
+                            {
+                                key: 'servings',
+                                type: 'input',
+                                templateOptions: {
+                                    type: 'number',
+                                    label: 'Enter Servings'
+                                }
+                            },
+                            {
+                                key: 'mainImage',
+                                type: 'input',
+                                templateOptions: {
+                                    type: 'text',
+                                    label: 'Enter Main Image Id'
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+
+
+
+        };
+
+
+        $scope.vm = {};
+
+        $scope.vm.user = {};
+
+        // note, these field types will need to be
+        // pre-defined. See the pre-built and custom templates
+        // http://docs.angular-formly.com/v6.4.0/docs/custom-templates
+        $scope.vm.userFields = [
+            {
+                key: 'email',
+                type: 'input',
+                templateOptions: {
+                    type: 'email',
+                    label: 'Email address'
+                }
+            },
+            {
+                key: 'password',
+                type: 'input',
+                templateOptions: {
+                    type: 'password',
+                    label: 'Enter Password'
+                }
+            },
+            {
+                key: 'text',
+                type: 'textarea',
+                templateOptions: {
+                    label: 'Enter value',
+                    id:"test"
+                }
+            },
+            {
+                key: 'select',
+                type: 'select',
+                templateOptions: {
+                    label: 'Enter value',
+                    options: [
+                        {id:1, name:"Robins Gupta"}
+                    ]
+                }
+            },
+            {
+                type: 'repeatSection',
+                key: 'investments',
+                templateOptions: {
+                    btnText:'Add another investment',
+                    fields: [
+                        {
+                            className: 'row',
+                            fieldGroup: [
+                                {
+                                    key: 'email',
+                                    type: 'input',
+                                    templateOptions: {
+                                        type: 'email',
+                                        label: 'Email address'
+                                    }
+                                },
+                                {
+                                    key: 'sel',
+                                    type: 'select',
+                                    templateOptions: {
+                                        label: 'Enter inline',
+                                        options: [
+                                            {id:1, name:"Robins"}
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            key: 'select',
+                            type: 'select',
+                            templateOptions: {
+                                label: 'Enter value',
+                                options: [
+                                    {id:1, name:"Robins Gupta"}
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ];
 
 
 
@@ -148,7 +431,6 @@ angular.module($snaphy.getModuleName())
                         type:"object",
                         required: true
                     }
-
                 },
                 "date":{
                     type:"date",
@@ -164,7 +446,6 @@ angular.module($snaphy.getModuleName())
                         required:true
                     }
                 }
-
             },
             "tables":{
                 name:{
