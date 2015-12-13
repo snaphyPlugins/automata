@@ -22,7 +22,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 		var loadModelList = packageObj["loadModels"];
 		//run each models in the loop and add a remote method to it.
 		loadModelList.forEach(function(modelName, index){
-
+			addRemoteMethod(server, modelName);
 		});
 	};
 
@@ -33,36 +33,190 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 	 * @param modelname
 	 * @param index
      */
-	var addRemoteMethod = function(app, modelname, index){
-			var modelObj = app.models[modelname];
-			modelObj.getSchema = function(callback) {
-				//Now form the schema and send it to the client..
-				var modelProperties = modelObj.definition.rawProperties;
-				var relations = model.definition.settings.relations;
-				var filters = model.definition.settings.filters;
-				var tables = model.definition.settings.tables;
-				var hiddenProperties = model.definition.settings.hidden;
+	var addRemoteMethod = function(app, modelName){
+		console.log("Adding remote method " + modelName);
+		var modelObj = app.models[modelName];
+		/**
+		 * ModelObj getSchema remote method..
+		 * @param callback
+         */
+		modelObj.getSchema = function(callback) {
+			//Now form the schema and send it to the client..
+			var relations = modelObj.definition.settings.relations;
+			var filters = modelObj.definition.settings.filters;
+			var tables = modelObj.definition.settings.tables;
 
-				/**
-				 * Now form the desired schema and return it.
-				 */
-				var schema = {};
+			/**
+			 * Now form the desired schema and return it.
+			 */
+			var header = addPropToHeader(app, modelName, ''),
+			//Get template structure..
+			schema = generateTemplateStr(app, modelName);
+			//Now recursively add relations to the models...
+			addNestedModelRelation(app, header, schema, relations);
 
+			//Now add filters and tables and headers to the model
+			schema.header  = header;
+			schema.filters = filters;
+			schema.tables  = tables;
 
+			callback(null, schema);
+		};
 
-				callback(null, schema);
-			};
-
-			//Now registering the method
-			modelObj.remoteMethod(
-					'getSchema',
-					{
-						returns: {arg: 'schema', type: 'object'},
-						description: "Send the schema of the model requested."
-					}
-			);
-
+		//Now registering the method `getSchema`
+		modelObj.remoteMethod(
+				'getSchema',
+				{
+					returns: {arg: 'schema', type: 'object'},
+					description: "Send the schema of the model requested."
+				}
+		);
 	};
+
+
+
+	//TODO ADD ENTRY FOR NESTED DATA RELATED MODELS NOT DONE AT CLIENT SIDE IN ANGULAR FORMLY.
+	/**
+	 * Recursive function for generating models schema. and header.
+	 * @param app
+	 * @param header
+	 * @param schema
+	 * @param relations
+     */
+	var addNestedModelRelation = function(app, header, schema, relations){
+		//Now adding  prop of belongTo and hasMany method to the header and schema respectfully...
+		for(var relationName in relations){
+			if(relations.hasOwnProperty(relationName)){
+				var relationObj = relations[relationName];
+				var modelName       = relationObj.model;
+
+				//Only add relation if template option in the template option is present..
+				if(relationObj.type === 'hasMany' && relationObj.templateOptions !== undefined){
+					var nestedSchema = {};
+					nestedSchema.type = 'repeatSection';
+					nestedSchema.key = relationName;
+					nestedSchema.templateOptions = relationObj.templateOptions;
+					//Now get nested schema str for the relational models..
+					nestedSchema = generateTemplateStr(app, relationObj.model, nestedSchema);
+					//Now add nestedSchema to the schema object.
+					schema.relations.hasMany.push(relationName);
+					schema.fields.push(nestedSchema);
+				}
+				if(relationObj.type === 'hasOne' || relationObj.type === 'belongsTo'){
+					//Now add its properties to the header..
+					header = addPropToHeader(app, relationObj.model, relationName,  header);
+				}
+
+				//TODO THESE LINES OF CODE IS NOT NEEDED AND SHOULD BE REMOVED
+				//Now checking if the nested relation still has any relations..
+				/*var relationPresent = checkModelRelation(app, modelName);
+				if(relationPresent){
+					var modelObj          = app.models[modelName];
+					var nestedRelationObj = modelObj.definition.settings.relations;
+					//recursive call the function..and add nested methods..
+					addNestedModelRelation(app, header, schema, nestedRelationObj );
+				}*/
+			}
+		}//for in loop..
+	};
+
+
+	/**
+	 * Checks if the model has any relations property..
+	 * @param app
+	 * @param modelName
+	 * @returns {boolean}
+	 * //TODO THIS METHOD IS NOT NEEDED AND SHOULD BE REMOVED
+     */
+	var checkModelRelation = function(app, modelName){
+		var modelObj = app.models[modelName];
+		var relationFound = false;
+		for(var relationName in modelObj.definition.settings.relations){
+			if(modelObj.definition.settings.relations.hasOwnProperty(relationName)){
+				relationFound = true;
+				break;
+			}
+		}
+		return relationFound;
+	};
+
+
+	/**
+	 * Generate header by adding properties key names.
+	 * @param app
+	 * @param modelName
+	 * @param prefix
+	 * @param header
+     * @returns {*|Array}
+     */
+	var addPropToHeader = function(app, modelName, prefix,  header){
+		header = header || [];
+		var modelObj = app.models[modelName],
+		modelProperties = modelObj.definition.rawProperties,
+		hiddenProperties = modelObj.definition.settings.hidden;
+		for(var key in modelProperties){
+			if(modelProperties.hasOwnProperty(key)){
+				//Add only if template is defined.
+				if(modelProperties[key].template !== undefined){
+					var propIsHidden = false;
+					//Now checkingif the value is a hidden prop.
+					for(var i=0; i<hiddenProperties.length; i++){
+						var prop = hiddenProperties[i];
+						if(prop ===  key){
+							propIsHidden = true;
+							break;
+						}
+					}
+					if(!propIsHidden){
+						if(prefix === ''){
+							//Add key to the header..
+							header.push(key);
+						}else{
+							header.push(prefix + '_' + key);
+						}
+
+					}
+				}//if
+			}
+		};
+		return header;
+	};
+
+
+	/**
+	 * Generate template structure for data entry schema.
+	 * @param app
+	 * @param modelName
+	 * @param schema
+     * @returns {*}
+     */
+	var generateTemplateStr = function(app, modelName, schema){
+		console.log(modelName);
+		if(schema === undefined){
+			schema = {};
+			schema.model = modelName;
+			schema.relations = {
+				hasMany:[]
+				//belongsTo:[],
+				//hasManyThrough:[],
+				//hasAndBelongToMany:[]
+			};
+		}
+		schema.fields = schema.fields || [];
+		var modelObj    = app.models[modelName],
+		modelProperties = modelObj.definition.rawProperties;
+		for(var propertyName in modelProperties){
+			if(modelProperties.hasOwnProperty(propertyName)){
+				var propObj = modelProperties[propertyName].template;
+				if(propObj !== undefined){
+					propObj.key = propertyName;
+					schema.fields.push(propObj);
+				}
+			}
+		}//for-in
+		return schema;
+	};
+
 
 
 
