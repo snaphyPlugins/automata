@@ -136,6 +136,8 @@ angular.module($snaphy.getModuleName())
             /**
              * Validate the model here..
              */
+            console.log(formStructure);
+            
             //Now save the model..
             var baseDatabase = Database.loadDb(formStructure.model);
             var relatedData = {

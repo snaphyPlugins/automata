@@ -4,34 +4,6 @@
 angular.module($snaphy.getModuleName())
 
 
-/*
-//This method is not needed now as datatable is now loaded by angular-datatabase framework 
- .directive('snaphyLoadDatatable', ['$timeout', function ($timeout) {
-    return {
-        restrict: 'A',
-        compile: function(){
-            // Compile code goes here.
-            return {
-                post: function postLink( ) {
-                    // Post-link code goes here
-                    $timeout(function(){
-                        try{
-                            // Initialize when page loads
-                            jQuery(function(){ BaseTableDatatables.init(); });
-                        }catch (err){
-                            /*Do nothing error occured due to multiple table initialization.. */
-                        }
-
-                    }); //timeout method..
-                }
-            };
-        },
-       
-    }; // End of return
-}])
-*/
-
-
 /**
  *Directive for defining filters $date
  * */
