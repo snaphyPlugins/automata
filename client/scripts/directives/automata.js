@@ -4,7 +4,9 @@
 angular.module($snaphy.getModuleName())
 
 
-.directive('snaphyLoadDatatable', ['$timeout', function ($timeout) {
+/*
+//This method is not needed now as datatable is now loaded by angular-datatabase framework 
+ .directive('snaphyLoadDatatable', ['$timeout', function ($timeout) {
     return {
         restrict: 'A',
         compile: function(){
@@ -24,12 +26,10 @@ angular.module($snaphy.getModuleName())
                 }
             };
         },
-        link: function () {
-            /*Methods moved to compile for one time call only..*/
-        }//End of Link function...
+       
     }; // End of return
 }])
-
+*/
 
 
 /**

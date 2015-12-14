@@ -3,14 +3,20 @@
 angular.module($snaphy.getModuleName())
 
 //Controller for automataControl ..
-.controller('automataControl', ['$scope', '$stateParams', 'Database', '$timeout',
-    function($scope, $stateParams, Database, $timeout) {
+.controller('automataControl', ['$scope', '$state', 'Database',
+    function($scope, $state, Database) {
         //Checking if default templating feature is enabled..
         var defaultTemplate = $snaphy.loadSettings('automata', "defaultTemplate");
+        $scope.databasesList = $snaphy.loadSettings('automata', "loadDatabases");
         $snaphy.setDefaultTemplate(defaultTemplate);
 
-
-
+        //get the current state name..
+        var currentState = $state.current.name; 
+        //Storing an instance of table values..
+        $scope.rowListValues = [];
+        //Schema of the database
+        $scope.schema = {};
+        
 
         $scope.checkType = function(rowObject, columnHeader){
             var colValue = $scope.getColValue(rowObject, columnHeader);
@@ -121,7 +127,6 @@ angular.module($snaphy.getModuleName())
 
 
 
-
         /**
          * Model for storing the model structure..
          * @param formStructure
@@ -183,358 +188,57 @@ angular.module($snaphy.getModuleName())
                 });
             };
 
-
-
-
             /**
              * Other related model to be implemented later.
              */
 
-
         };
 
 
 
+        var populateData = function(databaseName){
+            var dbService = Database.loadDb(databaseName);
 
-        $scope.addFormJSON = {
-            model: "Employee",
-            relations:{
-                hasMany:['recipes'],
-                belongsTo:[],
-                hasManyThrough:[],
-                hasAndBelongToMany:[]
-            },
-            fields:[
-                {
-                    key: 'email',
-                    type: 'input',
-                    templateOptions: {
-                        type: 'email',
-                        label: 'Email address'
-                    }
-                },
-                {
-                    key: 'password',
-                    type: 'input',
-                    templateOptions: {
-                        type: 'password',
-                        label: 'Enter Password'
-                    }
-                },
-                {
-                    key: 'username',
-                    type: 'input',
-                    templateOptions: {
-                        label: 'Enter username',
-                        type:'text'
-                    }
-                },
-                {
-                    type: 'repeatSection',
-                    key: 'recipes',
-                    templateOptions: {
-                        btnText:'Add Recipes',
-                        fields:[
-                            {
-                                key: 'name',
-                                type: 'input',
-                                templateOptions: {
-                                    type: 'text',
-                                    label: 'Enter Recipe'
-                                }
-                            },
-                            {
-                                key: 'description',
-                                type: 'input',
-                                templateOptions: {
-                                    type: 'text',
-                                    label: 'Enter Description'
-                                }
-                            },
-                            {
-                                type: 'repeatSection',
-                                key: 'stepsImage',
-                                templateOptions: {
-                                    btnText:'Upload another image steps',
-                                    fields: [
-                                        {
-                                            className: 'row',
-                                            fieldGroup: [
-                                                {
-                                                    key: 'imageId',
-                                                    type: 'input',
-                                                    templateOptions: {
-                                                        type: 'text',
-                                                        label: 'Enter Image Id'
-                                                    }
-                                                },
-                                                {
-                                                    key: 'containerId',
-                                                    type: 'input',
-                                                    templateOptions: {
-                                                        type: 'text',
-                                                        label: 'Enter Container Id'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                key: 'recipeType',
-                                type: 'input',
-                                templateOptions: {
-                                    type: 'text',
-                                    label: 'Enter Recipe Type'
-                                }
-                            },
-                            {
-                                key: 'servings',
-                                type: 'input',
-                                templateOptions: {
-                                    type: 'number',
-                                    label: 'Enter Servings'
-                                }
-                            },
-                            {
-                                key: 'mainImage',
-                                type: 'input',
-                                templateOptions: {
-                                    type: 'text',
-                                    label: 'Enter Main Image Id'
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-
-
-
+            dbService.getSchema({}, {}, function(values){
+                $scope.schema = values.schema;
+                fetchDataSever($scope.schema, dbService);    
+            }, function(respHeader){
+                console.error(respHeader);
+            });
         };
 
 
-        $scope.vm = {};
 
-        $scope.vm.user = {};
+        var fetchDataSever = function(dataSchema, dbService){
+                var filterObj = {};
+                if(dataSchema.relations.belongsTo){
+                    filterObj.include = dataSchema.relations.belongsTo;
+                }
+                dbService.find({ filter: filterObj}, function(values){
+                    console.log(values);
+                    $scope.dataValues = values;
+                }, function(respHeader){
+                    console.log(respHeader);
+                });
+        }
 
-        // note, these field types will need to be
-        // pre-defined. See the pre-built and custom templates
-        // http://docs.angular-formly.com/v6.4.0/docs/custom-templates
-        $scope.vm.userFields = [
-            {
-                key: 'email',
-                type: 'input',
-                templateOptions: {
-                    type: 'email',
-                    label: 'Email address'
-                }
-            },
-            {
-                key: 'password',
-                type: 'input',
-                templateOptions: {
-                    type: 'password',
-                    label: 'Enter Password'
-                }
-            },
-            {
-                key: 'text',
-                type: 'textarea',
-                templateOptions: {
-                    label: 'Enter value',
-                    id:"test"
-                }
-            },
-            {
-                key: 'select',
-                type: 'select',
-                templateOptions: {
-                    label: 'Enter value',
-                    options: [
-                        {id:1, name:"Robins Gupta"}
-                    ]
-                }
-            },
-            {
-                type: 'repeatSection',
-                key: 'investments',
-                templateOptions: {
-                    btnText:'Add another investment',
-                    fields: [
-                        {
-                            className: 'row',
-                            fieldGroup: [
-                                {
-                                    key: 'email',
-                                    type: 'input',
-                                    templateOptions: {
-                                        type: 'email',
-                                        label: 'Email address'
-                                    }
-                                },
-                                {
-                                    key: 'sel',
-                                    type: 'select',
-                                    templateOptions: {
-                                        label: 'Enter inline',
-                                        options: [
-                                            {id:1, name:"Robins"}
-                                        ]
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            key: 'select',
-                            type: 'select',
-                            templateOptions: {
-                                label: 'Enter value',
-                                options: [
-                                    {id:1, name:"Robins Gupta"}
-                                ]
-                            }
-                        }
-                    ]
-                }
+
+        //Constructor for automata cuntroller..
+        $scope.init = function(){
+            for(var i=0; i< $scope.databasesList.length; i++){
+                if(currentState.toLowerCase().trim() === $scope.databasesList[i].toLowerCase().trim())
+                //Now populate the database one by one..
+                populateData( $scope.databasesList[i]);
+                $scope.tableTitle = currentState + ' ' + 'Data';
+                $scope.currentState = currentState;
+                $scope.title = currentState + ' Console';
+                $scope.description = " data management console.";
+                break;
             }
-        ];
+        }
 
-
-
-
-
-        /**
-         * INITIALIZING SOME DUMMY DATA..
-         */
-
-        $scope.tableTitle = "Testing";
-        $scope.currentState = "automata";
-        $scope.title = "Automata Plugin";
-        $scope.description = "Automata Plugin for auto generating CRUD methods.";
-
-        //Its a model properties for customer..
-        $scope.customerModelSettings = {
-            "header":['name', 'email', 'access_level', 'access_name',  'phoneNumber', "date", "status", "chef_name"],
-            "tables":{
-                name:{
-                    onClick:{
-                        state:"dashboard",
-                        params:{
-                            name:"name"
-                        }
-                    }
-
-                },
-                "status":{
-                    tag:{
-                        "Pending": "label-warning"
-                    }
-                }
-
-            },
-            "filters":{
-              "date":{
-                  "type":"$date",
-                  "default":{
-                      "from":"",
-                      "to":""
-                  },
-                  "label": "Recipe added between"
-              },
-              "email":{
-                  "type"  : "$multiSelect",
-                  "get"   : "/api/email",
-                  "label" : "Select multiple columns",
-                  "options":[
-                      {
-                          id:1,
-                          name:"robinskumar73@gmail.com"
-                      },
-                      {
-                          id:2,
-                          name:"ravigupta9363@gmail.com"
-                      }
-                  ]
-              },
-
-              "chef_name":{
-                  "type": "$select",
-                  "get" : "/api/chefs",
-                  "options":[
-                      {
-                          id:1,
-                          name:"Sanjeev Kapoor"
-                      },
-                      {
-                          id:2,
-                          name:"Tarla Dalal"
-                      }
-                  ],
-                  "label": "Select chefs"
-              },
-              "status":{
-                  "type":"$typeSelect",
-                  "options":[
-                      {
-                        name: "Pending",
-                        checked: false
-                      },
-                      {
-                        name: "Approved",
-                        checked: true
-                      },
-                      {
-                          name:"Rejected",
-                          checked: false
-                      }
-                  ],
-                  "label": "Choose types.."
-              }
-            }
-        };
-
-
-        $scope.rowListValues = [
-            {
-                name:"Robins Gupta",
-                email:"robinskumar73@gmail.com",
-                access:{
-                    level:{
-                        type:1,
-                        height:1
-                    },
-                    others:{
-                        email:"rohitbasu2030@gmail.com",
-                        height:1
-                    },
-                    "name": "Robins"
-
-                },
-                "phoneNumber": 9953242338,
-                "date": "Thu Dec 10 2015 17:34:50 GMT+0530 (IST)",
-                "status": "Pending",
-                "chef_name": "Sanjeev Kapoor"
-            },
-            {
-                name:"Ravi Gupta",
-                email:"ravikumar73@gmail.com",
-                access:{
-                    level:{
-                        type:2,
-                        height:0
-                    },
-                    "name": "Ravi"
-                },
-                "phoneNumber": 9953242338,
-                "date": "Thu Dec 11 2015 17:34:50 GMT+0530 (IST)",
-                "status": "Approved",
-                "chef_name": "Tarla Dalal"
-            }
-        ];
-
-
+        $scope.init();
+            
 
     }//controller function..
 ]);

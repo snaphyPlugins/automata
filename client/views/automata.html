@@ -22,71 +22,90 @@
 <!--ADD WIDGETS -->
 <!-- Page Content -->
 <div class="content">
-    <!-- User Widgets -->
-    <h2 class="content-heading">{{widgetsTitle}}</h2>
-
-    <!-- User Simple Widgets -->
+    <!-- Simple Vertical Tiles -->
     <div class="row">
         <div class="col-sm-6 col-lg-3">
-            <a class="block block-rounded block-link-hover3" href="javascript:void(0)">
-                <div class="block-content block-content-full clearfix">
-                    <div class="pull-right">
-                        <img class="img-avatar" src="assets/img/avatars/avatar7.jpg" alt="">
-                    </div>
-                    <div class="pull-left push-10-t">
-                        <div class="font-w600 push-5">12</div>
-                        <div class="text-muted">Recipe added </div>
-                    </div>
-                </div>
+            <a class="block block-bordered block-link-hover3" href="javascript:void(0)">
+                <table class="block-table text-center">
+                    <tbody>
+                        <tr>
+                            <td class="bg-gray-lighter border-r" style="width: 50%;">
+                                <div class="push-30 push-30-t">
+                                    <i class="si si-users fa-3x text-black-op"></i>
+                                </div>
+                            </td>
+                            <td style="width: 50%;">
+                                <div class="h1 font-w700"><span class="h2 text-muted">+</span> 750</div>
+                                <div class="h5 text-muted text-uppercase push-5-t">Users Added</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </a>
         </div>
         <div class="col-sm-6 col-lg-3">
-            <a class="block block-rounded block-link-hover3" href="javascript:void(0)">
-                <div class="block-content block-content-full clearfix">
-                    <div class="pull-right">
-                        <img class="img-avatar" src="assets/img/avatars/avatar7.jpg" alt="">
-                    </div>
-                    <div class="pull-left push-10-t">
-                        <div class="font-w600 push-5">5</div>
-                        <div class="text-muted">Recipe published today</div>
-                    </div>
-                </div>
+            <a class="block block-bordered block-link-hover3" href="javascript:void(0)">
+                <table class="block-table text-center">
+                    <tbody>
+                        <tr>
+                            <td class="bg-gray-lighter border-r" style="width: 50%;">
+                                <div class="push-30 push-30-t">
+                                    <i class="si si-speedometer fa-3x text-black-op"></i>
+                                </div>
+                            </td>
+                            <td style="width: 50%;">
+                                <div class="h1 font-w700"><span class="h2 text-muted">+</span> 3</div>
+                                <div class="h5 text-muted text-uppercase push-5-t">Added Today</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </a>
         </div>
         <div class="col-sm-6 col-lg-3">
-            <a class="block block-rounded block-link-hover3" href="javascript:void(0)">
-                <div class="block-content block-content-full clearfix">
-                    <div class="text-right pull-right push-10-t">
-                        <div class="font-w600 push-5">4</div>
-                        <div class="text-muted">Pending recipe</div>
-                    </div>
-                    <div class="pull-left">
-                        <img class="img-avatar" src="assets/img/avatars/avatar15.jpg" alt="">
-                    </div>
-                </div>
+            <a class="block block-bordered block-link-hover3" href="javascript:void(0)">
+                <table class="block-table text-center">
+                    <tbody>
+                        <tr>
+                            <td style="width: 50%;">
+                                <div class="h1 font-w700"><span class="h2 text-muted">+</span> 3</div>
+                                <div class="h5 text-muted text-uppercase push-5-t">Rejected Users</div>
+                            </td>
+                            <td class="bg-gray-lighter border-l" style="width: 50%;">
+                                <div class="push-30 push-30-t">
+                                    <i class="si si-user-unfollow fa-3x text-black-op"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </a>
         </div>
         <div class="col-sm-6 col-lg-3">
-            <a class="block block-rounded block-link-hover3" data-toggle="modal" data-target="#modal-large" href="javascript:void(0)">
-                <div class="block-content block-content-full clearfix">
-                    <div class="text-right pull-right push-10-t">
-                        <div class="font-w600 push-5">+</div>
-                        <div class="text-muted">Add recipe</div>
-                    </div>
-                    <div class="pull-left">
-                        <img class="img-avatar" src="assets/img/avatars/avatar15.jpg" alt="">
-                    </div>
-                </div>
+            <a class="block block-bordered block-link-hover3" data-toggle="modal" data-target="#modal-large" href="javascript:void(0)">
+                <table class="block-table text-center">
+                    <tbody>
+                        <tr>
+                            <td style="width: 50%;">
+                                <div class="h1 font-w700"><span class="h2 text-muted">+</span></div>
+                                <div class="h5 text-muted text-uppercase push-5-t">Add User</div>
+                            </td>
+                            <td class="bg-gray-lighter border-l" style="width: 50%;">
+                                <div class="push-30 push-30-t">
+                                    <i class="si si-note fa-3x text-black-op"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </a>
         </div>
     </div>
-    <!-- END User Simple Widgets -->
-</div>
+    <!-- END Simple Vertical Tiles -->
 
 
 
-
-<div  snaphy-load-datatable class="content">
+<div  class="content">
     <div class="row">
         <div class="col-lg-8 col-sm-12">
             <!-- Dynamic Table Full -->
@@ -97,20 +116,24 @@
                 <div class="block-content">
 
                     <div class="table-responsive" style="overflow-x: hidden;">
-                        <table id="automataTable" class="table table-bordered table-striped js-dataTable-full" >
+                        <table 
+                            id="automataTable" 
+                            class="table table-bordered table-striped js-dataTable-full" 
+                            dt-instance="dtInstance" 
+                            datatable="ng">
                             <thead>
                                 <tr>
                                     <!--Adding :: for one way binding -->
-                                    <th  ng-repeat="header in ::customerModelSettings.header">{{header}}</th>
+                                    <th  ng-repeat="header in ::schema.header">{{header}}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="(rowId, rowObject) in rowListValues">
+                                <tr ng-repeat="(rowId, rowObject) in ::dataValues">
                                     <!--Populating the table values and binding header with columnVal-->
                                     <td  ng-init="colType     = checkType(rowObject, header);
                                                  colValue    = getColValue(rowObject, header);
                                                  colKey      = getKey(rowObject, header);
-                                                 tableConfig = findModelPropertyTableConfig(customerModelSettings.tables, colKey);"  ng-repeat="header in ::customerModelSettings.header" >
+                                                 tableConfig = findModelPropertyTableConfig(schema.tables, colKey);"  ng-repeat="header in ::schema.header" >
                                         <span   data-sort="{{colValue}}"  data-filter="{{colValue}}" ng-if="colType === '[object String]'">
                                             <span ng-if="tableConfig.onClick !== undefined">
                                                 <!--Display link here..-->
@@ -176,17 +199,17 @@
                     <h3 class="block-title">Filters</h3>
                 </div>
                 <div class="block-content block-content-narrow">
-                    <form class="form-horizontal" >
+                   <!--  <form class="form-horizontal" >
                         <filter-date
-                                model-settings="customerModelSettings"
+                                model-settings="schema"
                                 table-id="automataTable"
                                 column-name="date"
                                 label="Select Date">
                         </filter-date>
 
                         <filter-select
-                                options="{{customerModelSettings.filters.chef_name.options}}"
-                                model-settings="customerModelSettings"
+                                options="{{schema.filters.chef_name.options}}"
+                                model-settings="schema"
                                 table-id="automataTable"
                                 column-name="chef_name"
                                 get="/api/chefs"
@@ -195,8 +218,8 @@
                         </filter-select>
 
                         <filter-multi-select
-                                options="{{customerModelSettings.filters.email.options}}"
-                                model-settings="customerModelSettings"
+                                options="{{schema.filters.email.options}}"
+                                model-settings="schema"
                                 table-id="automataTable"
                                 column-name="email"
                                 get="/api/email"
@@ -205,11 +228,11 @@
                         </filter-multi-select>
 
                         <filter-radio
-                                options="{{customerModelSettings.filters.status.options}}"
+                                options="{{schema.filters.status.options}}"
                                 table-id="automataTable"
                                 column-name="status"
                                 label="Choose status"
-                                model-settings="customerModelSettings">
+                                model-settings="schema">
                         </filter-radio>
 
                         <div class="form-group">
@@ -217,8 +240,8 @@
                                 <button ng-click="resetAll('automataTable')" class="btn btn-minw btn-default pull-right" type="button">Reset</button>
                             </div>
                         </div>
-                    </form>
-                    <!-- END Datepicker (Default forms) -->
+                    </form> -->
+                    
                 </div>
             </div><!--block-->
         </div><!--col-md-4-->
@@ -242,8 +265,8 @@
                         </div>
                         <div class="block-content block-content-narrow">
                             <form class="form-horizontal" >
-                                <formly-form model="vm.user" fields="addFormJSON.fields">
-                                    <button  type="submit" class="btn btn-sm btn-primary" ng-click="saveForm(addFormJSON, vm.user)" type="button" ><i class="fa fa-check"></i> Save</button>
+                                <formly-form model="vm.user" fields="schema.fields">
+                                    <button  type="submit" class="btn btn-sm btn-primary" ng-click="saveForm(schema, vm.user)" type="button" ><i class="fa fa-check"></i> Save</button>
                                 </formly-form>
                             </form>
                             <!-- END Datepicker (Default forms) -->
