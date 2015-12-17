@@ -229,16 +229,20 @@ angular.module($snaphy.getModuleName())
          * @param formModel
          */
         $scope.saveForm = function(formStructure, formModel) {
+            console.log(formStructure);
+            //return if form is empty.
+            if(jQuery.isEmptyObject(formModel)){
+                return null;
+            }
+
             //Now save the model..
             var baseDatabase = Database.loadDb(formStructure.model);
             var relatedData = {
                 hasMany: [],
                 belongsTo: []
-                    //hasManyThrough:[],
-                    //hasAndBelongToMany:[]
+                //hasManyThrough:[],
+                //hasAndBelongToMany:[]
             };
-
-            //var mainDataArray = $scope.dataValues;
 
             /**
              * Validate the model here..
