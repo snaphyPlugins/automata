@@ -112,8 +112,25 @@ angular.module($snaphy.getModuleName())
         };
 
 
-        var resetSavedForm = function(){
-          $scope.saveFormData = {};
+        var resetSavedForm = function(form){
+            $scope.saveFormData = {};
+            form.$setPristine();
+        };
+
+
+        $scope.enableButton = function(form){
+            try{
+                if(form.$dirty){
+                    if($.isEmptyObject(form.$error) ){
+                        return true;
+                    }
+                }else{
+                    return false;
+                }
+            }catch(err){
+                //disable button
+                return true;
+            }
         };
 
 
@@ -220,17 +237,25 @@ angular.module($snaphy.getModuleName())
             return null;
         };
 
+        /**
+         * Method  for checking if the automata form is valid.
+         * @param  {[type]} schema template schema object with property fields showing all the fields.
+         * @return {[type]}        [description]
+         */
+        $scope.isValid = function(form){
+            try{
 
-        //Method for checking if the form entered is valid.
+                if(form.validate() && form.$dirty){
+                    if($.isEmptyObject(form.$error) ){
+                        return true;
+                    }
+                }
+            }catch(err){
+                return false;
+            }
 
-        $scope.isFormValid = function(formClass){
-            //formId = formId.replace(/^\#/, '');
-            //console.log($('#' + formId).valid());
-            //now return the valid identity..
-            console.log($(formClass).valid());
-            return $(formClass).valid();
+            return false;
         };
-
 
 
         /**
@@ -239,24 +264,17 @@ angular.module($snaphy.getModuleName())
          * @param formModel
          * @param formID refrencing to the id attribute of the  form.
          */
-        $scope.saveForm = function(formStructure, formModel, formID) {
-            //return if form is empty.
-            if(jQuery.isEmptyObject(formModel)){
-                return null;
-            }
+        $scope.saveForm = function(formStructure, formModel) {
 
-            console.log($scope.isFormValid(formID));
-
-            if(!formStructure.form.$valid){
+            if(!$scope.isValid(formStructure.form)){
                 SnaphyTemplate.notify({
-                    message: "Data is not valid.",
+                    message: "Error data is Invalid.",
                     type: 'danger',
                     icon: 'fa fa-times',
                     align: 'right'
                 });
                 return null;
             }
-
 
             //Now save the model..
             var baseDatabase = Database.loadDb(formStructure.model);
@@ -316,7 +334,7 @@ angular.module($snaphy.getModuleName())
                 });
 
                 //Now reset the form..
-                resetSavedForm();
+                resetSavedForm(formStructure.form);
 
             } else {
                 //Now first prepare object..
@@ -415,10 +433,9 @@ angular.module($snaphy.getModuleName())
                  */
 
                  //Now reset the form finally..
-                 resetSavedForm();
+                 resetSavedForm(formStructure.form);
 
             } //else
-
         }; //saveForm
 
 
