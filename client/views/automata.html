@@ -137,7 +137,21 @@
                                         </span>
                                         <span ng-if="colType === '[object Array]'">
                                             <!--Do string populated work here...-->
-                                            {{getColValue(rowObject, header)}}
+                                            <!-- {{getColValue(rowObject, header)}} -->
+                                            <ul>
+                                                <li ng-repeat="arrayData in getColValue(rowObject, header)">
+                                                    <span ng-if="checkType(getColValue(rowObject, header), $index)  === '[object Object]'">
+                                                        <ul style="padding-left: 0px;">
+                                                            <li ng-repeat="(key, arrValue) in arrayData">
+                                                                {{arrValue}}
+                                                            </li>
+                                                        </ul>
+                                                    </span>
+                                                    <span ng-if="checkType(getColValue(rowObject, header), $index)  !== '[object Object]'">
+                                                        {{arrayData}}
+                                                    </span>
+                                                </li>
+                                            </ul>
                                         </span>
                                         <span ng-init="colType = getRelationColumnType (rowObject, header, colKey, colType);
                                               colValue = getRelationColumnValue(rowObject, header, colKey);"
