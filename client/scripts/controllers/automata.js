@@ -597,6 +597,15 @@ angular.module($snaphy.getModuleName())
                 }
             }
 
+            // if(dataSchema.relations.hasManyThrough) {
+            //     if(dataSchema.relations.hasManyThrough.length){
+            //         // dataSchema.relations.hasManyThrough.forEach(function(relationObj){
+            //         //     filterObj.include.push(relationName);
+            //         // });
+            //
+            //     }
+            // }
+
             if(dataSchema.relations.hasOne) {
                 if(dataSchema.relations.hasOne.length){
                     dataSchema.relations.hasOne.forEach(function(relationName){
@@ -628,6 +637,10 @@ angular.module($snaphy.getModuleName())
                         }
                     }
 
+
+                    //Now fetch the data of hasManyThrough from server..
+                    fetchHasManyThrough(element, dataSchema.relations.hasManyThrough);
+
                     //setting the value of the data successfully fetched..
                     $scope.dataValues.push(element);
                 });
@@ -649,6 +662,33 @@ angular.module($snaphy.getModuleName())
                 }
                 //console.log(respHeader);
             });
+        };
+
+
+        var fetchHasManyThrough = function(element, hasManyThrough){
+            if(hasManyThrough){
+                hasManyThrough.forEach(function(relationObj){
+                    //Fetch the data from the server..
+                    var throughModelName = relationObj.through;
+                    var throughModelService = Database.loadDb(throughModelName);
+                    var filter = {};
+
+                    filter.include =  filter.include || [];
+                    filter.include.push(relationObj.throughModelRelation);
+                    filter.where = {};
+                    filter.where[relationObj.whereId] = element.id;
+
+                    //Now fetch..
+                    throughModelService.find({
+                        filter: filter
+                    }, function(relatedDataValue){
+                        console.log("Related hasManyThrough data fetched successfully.");
+                        element[relationObj.relationName] = relatedDataValue;
+                    }, function(){
+                        console.error("error fetching hasManyThrough data");
+                    });
+                });
+            }
         };
 
         var addRelationDummyValue = function(relationArr, element, value){
