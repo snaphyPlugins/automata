@@ -141,11 +141,16 @@ var saveDataRelations = function(app, dataInstance, relations, modelRelationSche
         }//if
     }//for loop..
 
+
+
     /**
      * Return promise after all the callback has finished.
      */
+    //TODO PROMISE NOT CALLING AFTER THE RELATED DATA SAVED IS CALLING BEFORE RELATED DATA SAVED.
+    //TODO HasManyThrough data not fetched during promise. Must be fetched.
     Promise.all(promises).then(function(){
         var modelObj = app.models[modelName];
+        //console.log("All done");
         modelObj.findById(dataInstance.id, {include:include}, function(err, value){
             //Return callback.
             callback(null, value);
@@ -357,8 +362,6 @@ var deleteRepeatedData = function(throughModelObj, dataInstanceForeignKey, dataI
     //Now check for any repeated data.. and remove it..
     throughModelObj.find(filter)
     .then(function(values){
-        console.log("value found");
-        console.log(values);
         //Now loop each relation data and check if data present..
         values.forEach(function(element){
             var matchFound = false;
