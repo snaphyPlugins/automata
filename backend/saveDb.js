@@ -208,6 +208,7 @@ var saveOrUpdate = function(app, dataInstance, relationsType, relationDataObj, m
                 promises.push(upsertHasOne (app, modelObj, relationData, dataInstance, relationName, modelName,  callback) );
             }//if
             else if (relationsType === 'hasMany') {
+                //relatedModelClass, relationDataArr, dataInstance, relationName, foriegnKey, manyType, callback
                 promises.push( upsertTypeMany(modelObj, relationData, dataInstance, relationName, foriegnKey, 'hasMany', callback));
             }//else if
             else if(relationsType === 'hasAndBelongsToMany'){
@@ -439,17 +440,20 @@ var upsertTypeMany = function(relatedModelClass, relationDataArr, dataInstance, 
                 var idFound = false;
                 //Now loop over relationDataArr
                 for(var i=0; i< relationDataArr.length; i++){
-                    if(dataObj.id === relationDataArr[i].id){
-                        idFound = true;
+                    if(relationDataArr[i].id){
+                        if(dataObj.id.toString().trim() === relationDataArr[i].id.toString().trim()){
+                            idFound = true;
+                            break;
+                        }
                     }
                 }
                 if(!idFound){
-                    destroyHasManyRel(dataInstance, relationName, dataObj, callback);
+                    destroyHasManyRel(dataInstance, relationName, dataObj, manyType,  callback);
                 }
             });
 
             //add foriegnKey
-            relationDataArr.forEach(function(relationData, index){
+            relationDataArr.forEach(function(relationData){
 
                 if(manyType === 'hasMany'){
                     //relationData[foriegnKey] = dataInstance.id;
@@ -465,6 +469,31 @@ var upsertTypeMany = function(relatedModelClass, relationDataArr, dataInstance, 
         callback(err);
     }
 
+};
+
+
+//For destroying hasMany relation link ..
+var destroyHasManyRel = function(dataInstance, relationName, dataObj, manyType,  callback){
+    if(manyType === "hasMany"){
+        //destroy that data..
+        dataInstance[relationName].destroy(dataObj.id)
+        .then(function(){
+            console.log('unused hasMany link data destroyed');
+        })
+        .catch(function(err){
+              callback(err);
+        });
+    }else{
+
+        //Dont delete just remove.. the data..
+        dataInstance[relationName].remove(dataObj)
+        .then(function(){
+            console.log('unused hasAndBelongsToMany link data removed');
+        })
+        .catch(function(err){
+            callback(err);
+        });
+    }
 };
 
 
@@ -502,17 +531,7 @@ var upserthasAndBelongsToManyFinal = function(dataInstance, relationName, relati
 
 
 
-//For destroying hasMany relation link ..
-var destroyHasManyRel = function(dataInstance, relationName, dataObj, callback){
-    //destroy that data..
-    dataInstance[relationName].destroy(dataObj.id)
-    .then(function(){
-        console.log('unused hasMany link data destroyed');
-    })
-    .catch(function(){
-          callback(err);
-    });
-};
+
 
 
 
