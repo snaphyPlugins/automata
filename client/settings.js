@@ -21,7 +21,9 @@ var settings = {
         "Priority",
         "RecipeIngredients",
         "RecipeTag",
-        "Wishlist"
+        "Wishlist",
+        "Chef",
+        "RecipeAnalytic"
     ]
 };
 
