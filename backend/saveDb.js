@@ -2,6 +2,7 @@
 
 var Promise = require('bluebird');
 var _       = require('lodash');
+var async = require('async');
 
 /**
  * Method for adding save method
@@ -53,18 +54,39 @@ var addSaveMethod = function(app, modelName){
         };
 
         var include = addRelation(data, schema.relation, relations);
-        //Now save/update the data..
-        modelObj.upsert(data)
-        .then(function(dataInstance){
-            console.log(dataInstance);
-            console.log("\n\n\n");
-            console.log("Main data successfully updated");
-            saveDataRelations(app, dataInstance, relations, modelRelationSchema, modelName, include, schema.relation,  callback);
-        })
-        .catch(function(err){
-            console.log("Error saving data");
-            callback(err);
-        });
+        if(data.password !== undefined){
+            data.password = data.password.toString().trim();
+        }
+        if(data.id === undefined){
+            //Now save/update the data..
+
+            modelObj.create(data)
+            .then(function(dataInstance){
+                console.log("Main data successfully updated");
+                saveDataRelations(app, dataInstance, relations, modelRelationSchema, modelName, include, schema.relation,  callback);
+            })
+            .catch(function(err){
+                console.log("Error saving data");
+                callback(err);
+            });
+        }else{
+            //console.log("I am updatting");
+
+            //Now save/update the data..
+            modelObj.upsert(data)
+            .then(function(dataInstance){
+                //console.log(dataInstance);
+                //console.log("\n\n\n");
+                //console.log("Main data successfully updated");
+                saveDataRelations(app, dataInstance, relations, modelRelationSchema, modelName, include, schema.relation,  callback);
+            })
+            .catch(function(err){
+                console.log("Error saving data");
+                callback(err);
+            });
+
+        }
+
 
 
 
@@ -129,12 +151,15 @@ var addRelation = function(dataObj, relationSchema, localRelationObj){
  */
 var saveDataRelations = function(app, dataInstance, relations, modelRelationSchema, modelName, include, relationSchema, callback){
     var promises = [];
+    //console.log(relations.hasManyThrough.ingredients);
+    //console.log("=====================ABOVE WAS RELATION DATA=========================");
     //Now run a loop of the model schema..
     for(var relationsType in relations){
         if(relations.hasOwnProperty(relationsType)){
             var relationData = relations[relationsType];
             //Now check if the modelData is empty or not.
             if(!_.isEmpty(relationData)){
+
                 //Now save/update the current relation type.
                 saveOrUpdate(app, dataInstance, relationsType, relationData, modelRelationSchema, promises, modelName, relationSchema,  callback);
             }
@@ -215,6 +240,9 @@ var saveOrUpdate = function(app, dataInstance, relationsType, relationDataObj, m
                 promises.push(upsertTypeMany(modelObj, relationData, dataInstance, relationName, foriegnKey, 'hasAndBelongsToMany', callback) );
             }
             else if(relationsType === 'hasManyThrough'){
+
+                //console.log("========================BEFORE SENDING TO HASMANYTHROUGH===========================");
+                //console.log(relationData);
                 promises.push(upsertManyThrough(app, modelObj, relationData, dataInstance, relationName, foriegnKey, relationSchema,  callback) );
             }else{
                 //Do nothing
@@ -298,6 +326,8 @@ var upsertBelongsTo = function(modelObj, relationData, dataInstance, relationNam
 };
 
 
+
+
 var upsertManyThrough = function(app, modelObj, relationData, dataInstance, relationName, foriegnKey, relationSchema, callback){
     //now find the current relation schema..
     var hasManyThrough = relationSchema.hasManyThrough;
@@ -321,6 +351,7 @@ var upsertManyThrough = function(app, modelObj, relationData, dataInstance, rela
     }
     else{
         throughModelSchema = hasManyThrough[index];
+        //console.log(throughModelSchema);
         throughModelName   = throughModelSchema.through;
         throughModelObj    = app.models[throughModelName];
         dataInstanceForeignKey = throughModelSchema.whereId;
@@ -339,12 +370,19 @@ var upsertManyThrough = function(app, modelObj, relationData, dataInstance, rela
         throughModelObj       : throughModelObj
     };
 
-    deleteRepeatedData(throughModelObj, dataInstanceForeignKey, dataInstance, relationData, callback);
-
-    relationData.forEach(function(relationDataObj){
-        upsertHasManyThroughFinal(app, modelObj, relationDataObj, dataInstance, relationName, foriegnKey, relationSchema,  throughObj, callback);
-    });
+    deleteRepeatedData(app,
+         throughModelObj,
+         dataInstanceForeignKey,
+         dataInstance,
+         relationData,
+         modelObj,
+         relationName,
+         foriegnKey,
+         relationSchema,
+         throughObj,
+         callback);
 };
+
 
 
 /**
@@ -355,41 +393,70 @@ var upsertManyThrough = function(app, modelObj, relationData, dataInstance, rela
  * @param  {Function} callback               [description]
  * @return {[type]}                          [description]
  */
-var deleteRepeatedData = function(throughModelObj, dataInstanceForeignKey, dataInstance, relationData,  callback){
+var deleteRepeatedData = function(
+    app,
+    throughModelObj,
+    dataInstanceForeignKey,
+    dataInstance,
+    relationData,
+    modelObj,
+    relationName,
+    foriegnKey,
+    relationSchema,
+    throughObj,
+    callback){
     var filter = {};
     filter.where = {};
     filter.where[dataInstanceForeignKey] = dataInstance.id;
 
-    //Now check for any repeated data.. and remove it..
-    throughModelObj.find(filter)
-    .then(function(values){
-        //Now loop each relation data and check if data present..
-        values.forEach(function(element){
-            var matchFound = false;
-            //Now loop through relationData as well..
-            for(var i=0; i<relationData.length; i++){
-                var relatedDataObj = relationData[i];
-                if(relatedDataObj.id === element.id){
-                    matchFound = true;
-                    break;
-                }
-            }
-
-            if(!matchFound){
-                //destroy data..
-                element.destroy(function(err){
-                    if(err){
-                        callback(err);
-                        return null;
+    async.series([
+        function(){
+            //Now check for any repeated data.. and remove it..
+            throughModelObj.find(filter)
+            .then(function(values){
+                values.forEach(function(element){
+                    var matchFound = false;
+                    //Now loop through relationData as well..
+                    for(var i=0; i<relationData.length; i++){
+                        var relatedDataObj = relationData[i];
+                        if(relatedDataObj.id){
+                            if(relatedDataObj.id.toString().trim( ) === element.id.toString().trim()){
+                                matchFound = true;
+                                break;
+                            }
+                        }
                     }
-                    console.log("unused hasManyThrough data destroyed.");
+
+                    if(!matchFound){
+                        //destroy data..
+                        element.destroy(function(err){
+                            if(err){
+                                callback(err);
+                                return null;
+                            }
+                            console.log("unused hasManyThrough data destroyed.");
+                        });
+                    }
                 });
-            }
-        });
-    })
-    .catch(function(err){
-        callback(err);
-    });
+
+                relationData.forEach(function(relationDataObj){
+                    upsertHasManyThroughFinal(
+                        app,
+                        modelObj,
+                        relationDataObj,
+                        dataInstance,
+                        relationName,
+                        foriegnKey,
+                        relationSchema,
+                        throughObj,
+                        callback);
+                });
+            })
+            .catch(function(err){
+                callback(err);
+            });
+        }
+    ]);
 };
 
 
@@ -411,7 +478,7 @@ var upsertHasManyThroughFinal = function(app, modelObj, relationDataObj, dataIns
             throughObj.throughModelObj.upsert(relatedHasManyThroughData)
             .then(function(savedData){
                 console.log("HasMany through Data saved..");
-                console.log(savedData);
+                //console.log(savedData);
             })
             .catch(function(err){
                 callback(err);
@@ -422,10 +489,6 @@ var upsertHasManyThroughFinal = function(app, modelObj, relationDataObj, dataIns
         });
     }
 };
-
-
-
-
 
 
 
@@ -448,10 +511,63 @@ var upsertTypeMany = function(relatedModelClass, relationDataArr, dataInstance, 
                     }
                 }
                 if(!idFound){
-                    destroyHasManyRel(dataInstance, relationName, dataObj, manyType,  callback);
+                    destroyHasManyRel(
+                        dataInstance,
+                        relationName,
+                        dataObj,
+                        manyType,
+                        relationDataArr,
+                        relatedModelClass,
+                        callback);
                 }
             });
 
+
+        });
+    }
+    catch(err){
+        callback(err);
+    }
+
+};
+
+
+//For destroying hasMany relation link ..
+var destroyHasManyRel = function(
+    dataInstance,
+    relationName,
+    dataObj,
+    manyType,
+    relationDataArr,
+    relatedModelClass,
+    callback
+){
+    async.series([
+        function(){
+            if(manyType === "hasMany"){
+                //destroy that data..
+                dataInstance[relationName].destroy(dataObj.id)
+                .then(function(){
+                    console.log('unused hasMany link data destroyed');
+                })
+                .catch(function(err){
+                      callback(err);
+                });
+            }else{
+
+                //Dont delete just remove.. the data..
+                dataInstance[relationName].remove(dataObj)
+                .then(function(){
+                    console.log('unused hasAndBelongsToMany link data removed');
+                })
+                .catch(function(err){
+                    callback(err);
+                });
+
+
+            }
+
+        }, function(){
             //add foriegnKey
             relationDataArr.forEach(function(relationData){
 
@@ -463,37 +579,8 @@ var upsertTypeMany = function(relatedModelClass, relationDataArr, dataInstance, 
                     upserthasAndBelongsToManyFinal(dataInstance, relationName, relationData, relatedModelClass, callback);
                 }
             });
-        });
-    }
-    catch(err){
-        callback(err);
-    }
-
-};
-
-
-//For destroying hasMany relation link ..
-var destroyHasManyRel = function(dataInstance, relationName, dataObj, manyType,  callback){
-    if(manyType === "hasMany"){
-        //destroy that data..
-        dataInstance[relationName].destroy(dataObj.id)
-        .then(function(){
-            console.log('unused hasMany link data destroyed');
-        })
-        .catch(function(err){
-              callback(err);
-        });
-    }else{
-
-        //Dont delete just remove.. the data..
-        dataInstance[relationName].remove(dataObj)
-        .then(function(){
-            console.log('unused hasAndBelongsToMany link data removed');
-        })
-        .catch(function(err){
-            callback(err);
-        });
-    }
+        }
+    ]);
 };
 
 
