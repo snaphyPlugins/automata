@@ -237,6 +237,7 @@ var connectEachData = function(app, modelObj, foreignKey, relationProp, relation
 
 var disconnectEachData = function(app, modelObj, foreignKey, relationProp, relationName, modelName, mainModelInstance, relatedModelInstance, callback) {
     var relatedModel = app.models[relationProp.model];
+
     /**
      * dataInstance[relationName].remove(dataObj)
      .then(function() {
@@ -251,10 +252,6 @@ var disconnectEachData = function(app, modelObj, foreignKey, relationProp, relat
         .then(function(){
             //Now remove the related data too from each models..
             if(mainModelInstance[relationName + "_"]){
-                /*var evens = _.remove(array, function(n) {
-                    return n % 2 == 0;
-                });*/
-
                 //Now remove the related data refrence from mainModel
                 _.remove(mainModelInstance[relationName + "_"], function(id){
                     return id.toString() === relatedModelInstance.id.toString();
@@ -345,6 +342,17 @@ var disconnect = function(app, modelObj, foreignKey, relationProp, relationName,
                                 //Now remove the data and also remove the data from each other model..
                                 disconnectEachData(app, modelObj, foreignKey, relationProp, relationName, modelName, mainModelInstance, relatedModelInstance, callback);
                             });
+                        });
+
+                        //Now save the data in series..
+                        async.series(series, function(err){
+                            if(err){
+                                callback(err);
+                            }else{
+                                //Now send the callback
+                                callback(null, {});
+                            }
+                            console.log("data deleted successfully..");
                         });
 
                     })
