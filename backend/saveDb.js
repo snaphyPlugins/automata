@@ -612,7 +612,7 @@ var destroyHasManyRel = function(
                         callback(err);
                     });
             } else {
-                //Dont delete just remove.. the data..
+               /* //Dont delete just remove.. the data..
                 dataInstance[relationName].remove(dataObj)
                     .then(function() {
                         console.log('unused hasAndBelongsToMany link data removed');
@@ -620,7 +620,20 @@ var destroyHasManyRel = function(
                     })
                     .catch(function(err) {
                         callback(err);
-                    });
+                    });*/
+
+                //Changed now call new disconnect method...
+                var disconnect = dataInstance["__disconnect__" + relationName];
+                disconnect(dataInstance.id, dataObj.id, function(err, value){
+                    if(err){
+                        console.log(err);
+                    }else{
+                        //Now save the instance of data in the dataInstance
+                        //console.log("Link successfully remvoed to hasAndBelongsToMany relationship.");
+                        //console.log(values);
+                    }
+                });
+
             }
         }
     ]);
