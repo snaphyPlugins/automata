@@ -260,6 +260,7 @@ var disconnectEachData = function(app, modelObj, foreignKey, relationProp, relat
                     return id.toString() === relatedModelInstance.id.toString();
                 });
 
+
                 //Now further save the model..
                 mainModelInstance.save({}, function(err,  value){
                     if(err){
@@ -329,10 +330,23 @@ var disconnect = function(app, modelObj, foreignKey, relationProp, relationName,
                 //Now adding main model instance..
                 var relatedModel = app.models[relationProp.model];
                 //Find the list of related models..
-                relatedModel.findById(fk, {})
-                    .then(function(relatedModelInstance){
-                       //Now remove the data and also remove the data from each other model..
-                        disconnectEachData(app, modelObj, foreignKey, relationProp, relationName, modelName, mainModelInstance, relatedModelInstance, callback);
+                relatedModel.find({
+                        where:{
+                            id: {
+                                inq: fk
+                            }
+                        }
+                    })
+                    .then(function(relatedModelInstanceArr){
+                        var series = [];
+                        //Now prepare a series function..
+                        relatedModelInstanceArr.forEach(function(relatedModelInstance){
+                            series.push(function(callback){
+                                //Now remove the data and also remove the data from each other model..
+                                disconnectEachData(app, modelObj, foreignKey, relationProp, relationName, modelName, mainModelInstance, relatedModelInstance, callback);
+                            });
+                        });
+
                     })
                     .catch(function(err){
                         console.error(err);
@@ -361,7 +375,7 @@ var disconnect = function(app, modelObj, foreignKey, relationProp, relationName,
                 "description": "PersistedModel id"
             }, {
                 "arg": "fk",
-                "type": "string",
+                "type": "array",
                 "description": "Foreign key for cuisines",
                 "required": true,
                 "http": {
