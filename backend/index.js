@@ -446,10 +446,10 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 			rules:{},
 			messages:{}
 		};
+
 		for(var propertyName in modelProperties){
 			if(modelProperties.hasOwnProperty(propertyName)){
 				var propObj = modelProperties[propertyName].template;
-
 				if(propObj !== undefined){
 					propObj.key = propertyName;
 					//also add the validation to the object..
@@ -465,13 +465,43 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 								newValidationObj.messages[validationName] = validationMessages;
 							}
 						}
-
 					}catch(err){
 						// Do nothing
 						// Validation is not defined in the model definition
 					}
 
 					schema.fields.push(propObj);
+				}
+			}
+		}//for-in
+
+        //This code is just for adding validation in schema..of relation properties..
+        var modelRelation = modelObj.definition.settings.relations;
+        for(var relationName in modelRelation){
+			if(modelRelation.hasOwnProperty(relationName)){
+				var relationObj = modelRelation[relationName].templateOptions;
+				if(relationObj !== undefined){
+					relationObj.key = relationName;
+					//also add the validation to the object..
+					try{
+						var validationRules_ = validationObj.rules[relationName];
+						var validationMessages_ = validationObj.messages[relationName];
+
+						if(relationObj && validationRules_){
+							if(relationObj.id){
+								var validationName_ = relationObj.id;
+								//Get the validation object..
+								newValidationObj.rules[validationName_] = validationRules_;
+								newValidationObj.messages[validationName_] = validationMessages_;
+							}
+						}
+
+					}catch(err){
+                        console.error(err);
+						// Do nothing
+						// Validation is not defined in the model definition
+					}
+
 				}
 			}
 		}//for-in
