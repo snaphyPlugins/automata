@@ -160,7 +160,6 @@ var addRelation = function(dataObj, relationSchema, localRelationObj) {
 var saveDataRelations = function(app, dataInstance, relations, modelRelationSchema, modelName, include, relationSchema, callback) {
     var promises = [];
     for (var relationsType in relations) {
-
         if (relations.hasOwnProperty(relationsType)) {
             var relationData = relations[relationsType];
             //Now check if the modelData is empty or not.
@@ -654,6 +653,7 @@ var upserthasAndBelongsToManyFinal = function(dataInstance, relationName, relati
                 if(err){
                     console.log(err);
                 }else{
+                    //console.info(dataInstance);
                     //Now save the instance of data in the dataInstance
                     console.log("Link successfully added to hasAndBelongsToMany relationship.");
                 }

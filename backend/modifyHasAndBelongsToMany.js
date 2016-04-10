@@ -225,7 +225,7 @@ var connectEachData = function(app, modelObj, foreignKey, relationProp, relation
                                 console.error(err);
                                 callback(err);
                             }else{
-                                console.info("saving related value", value);
+                                //console.info("saving related value", value);
                                 //Do nothing.. return async callback..success..
                                 callback();
                             }
@@ -254,71 +254,73 @@ var disconnectEachData = function(app, modelObj, foreignKey, relationProp, relat
     .catch(function(err) {
             callback(err);
         });
-     */
+    */
     mainModelInstance[relationName].remove(relatedModelInstance)
         .then(function(){
             //Now remove the related data too from each models..
             if(mainModelInstance[relationName + "_"]){
-
+                
                 //remove the given instance..
                 delete mainModelInstance[relationName + "_"][relatedModelInstance.id];
 
-                //persistedModel.updateAttribute(name, value, callback)
-                mainModelInstance.updateAttribute(relationName + "_", mainModelInstance[relationName + "_"], function(err, value){
-                    if(err){
-                        console.error(err);
-                        callback(err);
-                    }else{
-                        console.log("Successfully remove ref of hasAndBelongsToMany from main model");
+                setTimeout(function(){
+                    //persistedModel.updateAttribute(name, value, callback)
+                    mainModelInstance.updateAttribute(relationName + "_", mainModelInstance[relationName + "_"], function(err, value){
+                        if(err){
+                            console.error(err);
+                            callback(err);
+                        }else{
+                            console.log("Successfully remove ref of hasAndBelongsToMany from main model");
 
-                        //Now also remove the main model id reference from related model ..
-                        var relatedModelRelationName;
-                        var relatedModelRelationProp;
-                        //Now also add data to related data..
-                        //Now the related model name..relation name
-                        var relatedModelRelationObj = relatedModel.definition.settings.relations;
-                        for(var relatedRelationName in relatedModelRelationObj){
-                            if(relatedModelRelationObj.hasOwnProperty(relatedRelationName)){
-                                var relatedRelationProp = relatedModelRelationObj[relatedRelationName];
-                                if(relatedRelationProp.model === modelName){
-                                    relatedModelRelationName = relatedRelationName;
-                                    relatedModelRelationProp = relatedRelationProp;
-                                    break;
+                            //Now also remove the main model id reference from related model ..
+                            var relatedModelRelationName;
+                            var relatedModelRelationProp;
+                            //Now also add data to related data..
+                            //Now the related model name..relation name
+                            var relatedModelRelationObj = relatedModel.definition.settings.relations;
+                            for(var relatedRelationName in relatedModelRelationObj){
+                                if(relatedModelRelationObj.hasOwnProperty(relatedRelationName)){
+                                    var relatedRelationProp = relatedModelRelationObj[relatedRelationName];
+                                    if(relatedRelationProp.model === modelName){
+                                        relatedModelRelationName = relatedRelationName;
+                                        relatedModelRelationProp = relatedRelationProp;
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if(relatedModelRelationName){
-                            //Now also remove the ref of main model..
-                            if(relatedModelInstance[relatedModelRelationName + "_"]){
-                                console.info("============================BEFORE DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
-                                console.info(relatedModelInstance[relatedModelRelationName + "_"]);
-                                //Remove the related data.....
-                                delete relatedModelInstance[relatedModelRelationName + "_"][mainModelInstance.id];
-                                console.info("============================AFTER DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
-                                console.info(relatedModelInstance[relatedModelRelationName + "_"]);
-
-                                //persistedModel.updateAttribute(name, value, callback)
-                                relatedModelInstance.updateAttribute(relatedModelRelationName + "_", relatedModelInstance[relatedModelRelationName + "_"], function(err, value){
-                                    if(err){
-                                        console.error(err);
-                                        callback(err);
-                                    }else{
-                                        console.log("Successfully remove ref of hasAndBelongsToMany from related model too");
-                                        //finally return the callback..
-                                        callback(null, {});
-                                    }
-                                });
+                            if(relatedModelRelationName){
+                                //Now also remove the ref of main model..
+                                if(relatedModelInstance[relatedModelRelationName + "_"]){
+                                    setTimeout(function(){
+                                        //Remove the related data.....
+                                        delete relatedModelInstance[relatedModelRelationName + "_"][mainModelInstance.id];
+                
+                                        //persistedModel.updateAttribute(name, value, callback)
+                                        relatedModelInstance.updateAttribute(relatedModelRelationName + "_", relatedModelInstance[relatedModelRelationName + "_"], function(err, value){
+                                            if(err){
+                                                console.error(err);
+                                                callback(err);
+                                            }else{
+                                                console.log("Successfully remove ref of hasAndBelongsToMany from related model too");
+                                                //finally return the callback..
+                                                callback(null, {});
+                                            }
+                                        });
+                                    }, 20);
+                                        
+                                }else{
+                                    //finally return the callback..
+                                    callback(null, {});
+                                }
                             }else{
                                 //finally return the callback..
                                 callback(null, {});
                             }
-                        }else{
-                            //finally return the callback..
-                            callback(null, {});
-                        }
-                    }//else
-                });
+                        }//else
+                    });
+                }, 20); //setTimeout 
+                    
 
 
                 
@@ -369,7 +371,7 @@ var disconnect = function(app, modelObj, foreignKey, relationProp, relationName,
                                 //Now send the callback
                                 callback(null, {});
                             }
-                            console.log("data deleted successfully..");
+                            console.log("=====================data deleted successfully..======================");
                         });
 
                     })
