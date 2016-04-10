@@ -293,11 +293,11 @@ var disconnectEachData = function(app, modelObj, foreignKey, relationProp, relat
                 if(relatedModelRelationName){
                     //Now also remove the ref of main model..
                     if(relatedModelInstance[relatedModelRelationName + "_"]){
-                        console.info("============================BEFORE DELETING IMAGE FROM SERVER==============================");
+                        console.info("============================BEFORE DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
                         console.info(relatedModelInstance[relatedModelRelationName + "_"]);
                         //Remove the related data.....
                         delete relatedModelInstance[relatedModelRelationName + "_"][mainModelInstance.id];
-                        console.info("============================AFTER DELETING IMAGE FROM SERVER==============================");
+                        console.info("============================AFTER DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
                         console.info(relatedModelInstance[relatedModelRelationName + "_"]);
 
                         //persistedModel.updateAttribute(name, value, callback)
