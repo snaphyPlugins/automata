@@ -267,53 +267,66 @@ var disconnectEachData = function(app, modelObj, foreignKey, relationProp, relat
                 mainModelInstance.updateAttribute(relationName + "_", mainModelInstance[relationName + "_"], function(err, value){
                     if(err){
                         console.error(err);
+                        callback(err);
                     }else{
                         console.log("Successfully remove ref of hasAndBelongsToMany from main model");
-                    }
+
+                        //Now also remove the main model id reference from related model ..
+                        var relatedModelRelationName;
+                        var relatedModelRelationProp;
+                        //Now also add data to related data..
+                        //Now the related model name..relation name
+                        var relatedModelRelationObj = relatedModel.definition.settings.relations;
+                        for(var relatedRelationName in relatedModelRelationObj){
+                            if(relatedModelRelationObj.hasOwnProperty(relatedRelationName)){
+                                var relatedRelationProp = relatedModelRelationObj[relatedRelationName];
+                                if(relatedRelationProp.model === modelName){
+                                    relatedModelRelationName = relatedRelationName;
+                                    relatedModelRelationProp = relatedRelationProp;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(relatedModelRelationName){
+                            //Now also remove the ref of main model..
+                            if(relatedModelInstance[relatedModelRelationName + "_"]){
+                                console.info("============================BEFORE DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
+                                console.info(relatedModelInstance[relatedModelRelationName + "_"]);
+                                //Remove the related data.....
+                                delete relatedModelInstance[relatedModelRelationName + "_"][mainModelInstance.id];
+                                console.info("============================AFTER DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
+                                console.info(relatedModelInstance[relatedModelRelationName + "_"]);
+
+                                //persistedModel.updateAttribute(name, value, callback)
+                                relatedModelInstance.updateAttribute(relatedModelRelationName + "_", relatedModelInstance[relatedModelRelationName + "_"], function(err, value){
+                                    if(err){
+                                        console.error(err);
+                                        callback(err);
+                                    }else{
+                                        console.log("Successfully remove ref of hasAndBelongsToMany from related model too");
+                                        //finally return the callback..
+                                        callback(null, {});
+                                    }
+                                });
+                            }else{
+                                //finally return the callback..
+                                callback(null, {});
+                            }
+                        }else{
+                            //finally return the callback..
+                            callback(null, {});
+                        }
+                    }//else
                 });
 
 
-                //Now also remove the main model id reference from related model ..
-                var relatedModelRelationName;
-                var relatedModelRelationProp;
-                //Now also add data to related data..
-                //Now the related model name..relation name
-                var relatedModelRelationObj = relatedModel.definition.settings.relations;
-                for(var relatedRelationName in relatedModelRelationObj){
-                    if(relatedModelRelationObj.hasOwnProperty(relatedRelationName)){
-                        var relatedRelationProp = relatedModelRelationObj[relatedRelationName];
-                        if(relatedRelationProp.model === modelName){
-                            relatedModelRelationName = relatedRelationName;
-                            relatedModelRelationProp = relatedRelationProp;
-                            break;
-                        }
-                    }
-                }
-
-                if(relatedModelRelationName){
-                    //Now also remove the ref of main model..
-                    if(relatedModelInstance[relatedModelRelationName + "_"]){
-                        console.info("============================BEFORE DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
-                        console.info(relatedModelInstance[relatedModelRelationName + "_"]);
-                        //Remove the related data.....
-                        delete relatedModelInstance[relatedModelRelationName + "_"][mainModelInstance.id];
-                        console.info("============================AFTER DELETING IMAGE FROM SERVER==============================", mainModelInstance.id);
-                        console.info(relatedModelInstance[relatedModelRelationName + "_"]);
-
-                        //persistedModel.updateAttribute(name, value, callback)
-                        relatedModelInstance.updateAttribute(relatedModelRelationName + "_", relatedModelInstance[relatedModelRelationName + "_"], function(err, value){
-                            if(err){
-                                console.error(err);
-                            }else{
-                                console.log("Successfully remove ref of hasAndBelongsToMany from related model too");
-                            }
-                        });
-                    }
-                }
+                
+            }else{
+                //finally return the callback..
+                callback(null, {});
             }
 
-            //finally return the callback..
-            callback(null, {});
 
         })
         .catch(function(err){
