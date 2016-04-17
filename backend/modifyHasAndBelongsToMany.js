@@ -371,7 +371,7 @@ var disconnect = function(app, modelObj, foreignKey, relationProp, relationName,
                                 //Now send the callback
                                 callback(null, {});
                             }
-                            console.log("=====================data deleted successfully..======================");
+                            //console.log("=====================data deleted successfully..======================");
                         });
 
                     })
